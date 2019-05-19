@@ -1,26 +1,35 @@
 import pandas as pd
-from sklearn.impute import SimpleImputer
 import numpy as np
 
+from sklearn.impute import SimpleImputer
+
+"""DATASET"""
 dataset = pd.read_csv('DataSet.csv')
 
-users = dataset.iloc[:,:1].values   #Column USERS
-data = dataset.iloc[:,1:].values    #THE REST DATA
+"""USERS"""
+users = dataset.iloc[:,:1].values
 
-"""NEW USERS"""
-NU1 = [3,np.nan,5,4,2,3,np.nan,5]
-NU2 = [np.nan,5,2,2,4,np.nan,1,3]
+"""DATA"""
+data = dataset.iloc[:,1:].values
 
 """BOOKS"""
-BOOKS = ['TRUE BELIEVER', 'THE DA VINCI CODE', 'THE WORLD IS FLAT', 'MY LIFE SO FAR', 'THE TAKING', 'THE KITE RUNNER', 'RUNNY BABBIT', 'HARRY POTTER']
+BOOKS = list(dataset.head(0))
+del BOOKS[0]
 
+"""NEW USERS"""
+NU1 = [3, np.nan, 5, 4, 2, 3, np.nan, 5]
+NU2 = [np.nan, 5, 2, 2, 4, np.nan, 1, 3]
 
-""" Filling with mean value
-imputer = SimpleImputer(missing_values = np.nan, strategy = 'mean')
-imputer = imputer.fit(data)
-dataset = imputer.transform(data)
-print(dataset)
+"""STRATEGY: 
+    none = np.nan at missing values
+    mean = mean at missing values
 """
+STRATEGY = 'none'
+
+if STRATEGY == 'mean':
+    imput = SimpleImputer(missing_values=np.nan, strategy='mean')
+    imput = imput.fit(data)
+    data = imput.transform(data)
 
 
 def pearson_correlation(numbers_x, numbers_y):
@@ -44,9 +53,11 @@ rNU2 = user_correlation_array(data, NU2)
 
 print('ALL CORREL VALUES r for NU1')
 print(rNU1)
+print('\n')
 
 print('ALL CORREL VALUES r for NU2')
 print(rNU2)
+print('\n')
 
 
 def get_positions_from_correlation_list(u):
@@ -63,6 +74,7 @@ def get_positions_from_correlation_list(u):
 print('3 POSITIONS OF CORREL VALUES')
 print(get_positions_from_correlation_list(rNU1))
 print(get_positions_from_correlation_list(rNU2))
+print('\n')
 
 
 def get_values_from_correlation_list(u):
@@ -72,9 +84,12 @@ def get_values_from_correlation_list(u):
         values.append(u[positions[i]])
     return values
 
+
 print('3 CORREL VALUES')
 print(get_values_from_correlation_list(rNU1))
 print(get_values_from_correlation_list(rNU2))
+print('\n')
+
 
 def get_values_from_movie_list(m, u):
     values = list()
@@ -119,11 +134,13 @@ def get_calculated_rating(m, u):
     return divide(sum(c), sum(a))
 
 
-# print('NU1, The DaVinci Code : {} ' . format(get_calculated_rating(dataset['THE DA VINCI CODE'], rNU1)))
-# print('NU1, RUNNY BABBIT : {} ' . format(get_calculated_rating(dataset['RUNNY BABBIT'], rNU1)))
-#
-# print('NU2, TRUE BELIEVER : {} ' . format(get_calculated_rating(dataset['TRUE BELIEVER'], rNU2)))
-# print('NU2, THE KITE RUNNER : {} ' . format(get_calculated_rating(dataset['THE KITE RUNNER'], rNU2)))
+print('NU1, The DaVinci Code : {} ' . format(get_calculated_rating(dataset['THE DA VINCI CODE'], rNU1)))
+print('NU1, RUNNY BABBIT : {} ' . format(get_calculated_rating(dataset['RUNNY BABBIT'], rNU1)))
+print('\n')
+
+print('NU2, TRUE BELIEVER : {} ' . format(get_calculated_rating(dataset['TRUE BELIEVER'], rNU2)))
+print('NU2, THE KITE RUNNER : {} ' . format(get_calculated_rating(dataset['THE KITE RUNNER'], rNU2)))
+print('\n')
 
 
 def calculated_rating_list_by_user(b, u):
@@ -135,9 +152,11 @@ def calculated_rating_list_by_user(b, u):
 
 print('calculated rating list by user NU1')
 print(calculated_rating_list_by_user(BOOKS, rNU1))
+print('\n')
 
 print('calculated rating list by user NU2')
 print(calculated_rating_list_by_user(BOOKS, rNU2))
+print('\n')
 
 
 def get_mae_by_user(b, u, uc):
@@ -158,7 +177,8 @@ def get_mae_by_user(b, u, uc):
 
 print('MAE NU1')
 print(get_mae_by_user(BOOKS, NU1, rNU1))
+print('\n')
 
 print('MAE NU2')
 print(get_mae_by_user(BOOKS, NU2, rNU2))
-
+print('\n')
