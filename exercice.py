@@ -8,8 +8,12 @@ users = dataset.iloc[:,:1].values   #Column USERS
 data = dataset.iloc[:,1:].values    #THE REST DATA
 
 """NEW USERS"""
-NU1 = np.array([3,np.nan,5,4,2,3,np.nan,5])
-NU2 = np.array([np.nan,5,2,2,4,np.nan,1,3])
+NU1 = [3,np.nan,5,4,2,3,np.nan,5]
+NU2 = [np.nan,5,2,2,4,np.nan,1,3]
+
+"""BOOKS"""
+BOOKS = ['TRUE BELIEVER', 'THE DA VINCI CODE', 'THE WORLD IS FLAT', 'MY LIFE SO FAR', 'THE TAKING', 'THE KITE RUNNER', 'RUNNY BABBIT', 'HARRY POTTER']
+
 
 """ Filling with mean value
 imputer = SimpleImputer(missing_values = np.nan, strategy = 'mean')
@@ -44,18 +48,21 @@ print(rNU1)
 print('ALL CORREL VALUES r for NU2')
 print(rNU2)
 
+
 def get_positions_from_correlation_list(u):
     theset = frozenset(u)
     theset = sorted(theset, reverse=True)
     thedict = {}
     for j in range(3):
-        positions = [i for i, x in enumerate(rNU1) if x == theset[j]]
+        positions = [i for i, x in enumerate(u) if x == theset[j]]
         thedict[theset[j]] = positions
     output = thedict.get(theset[0]) + thedict.get(theset[1]) + thedict.get(theset[2])
     return output[0:3]
 
+
 print('3 POSITIONS OF CORREL VALUES')
 print(get_positions_from_correlation_list(rNU1))
+print(get_positions_from_correlation_list(rNU2))
 
 
 def get_values_from_correlation_list(u):
@@ -67,7 +74,7 @@ def get_values_from_correlation_list(u):
 
 print('3 CORREL VALUES')
 print(get_values_from_correlation_list(rNU1))
-
+print(get_values_from_correlation_list(rNU2))
 
 def get_values_from_movie_list(m, u):
     values = list()
@@ -77,13 +84,6 @@ def get_values_from_movie_list(m, u):
     return values
 
 
-print('THE DA VINCI CODE')
-print(get_values_from_movie_list(dataset['THE DA VINCI CODE'], rNU1))
-
-print('RUNNY BABBIT')
-print(get_values_from_movie_list(dataset['RUNNY BABBIT'], rNU1))
-
-
 def find_nan_positions(l):
     nans = list()
     for i in range(len(l)):
@@ -91,15 +91,15 @@ def find_nan_positions(l):
             nans.append(i)
     return nans
 
-print("THE DA VINCI CODE NaN Values")
-print(find_nan_positions(get_values_from_movie_list(dataset['THE DA VINCI CODE'], rNU1)))
-
-
-print("RUNNY BABBIT NaN Values")
-print(find_nan_positions(get_values_from_movie_list(dataset['RUNNY BABBIT'], rNU1)))
-
 
 print('Calculated rating with user-based collaborative filtering')
+
+
+def divide(x,y):
+    try:
+        return x/y
+    except ZeroDivisionError:
+        return 0
 
 
 def get_calculated_rating(m, u):
@@ -108,17 +108,57 @@ def get_calculated_rating(m, u):
     b = get_values_from_movie_list(m, u)
 
     if len(nan_positions) > 0:
-        for x in range(len(a)):
-            if x in nan_positions:
-                del a[x]
-        for x in range(len(b)):
-            if x in nan_positions:
-                del b[x]
+        for x in reversed(range(len(a))):
+                if x in nan_positions:
+                    del a[x]
+        for x in reversed(range(len(b))):
+                if x in nan_positions:
+                    del b[x]
 
     c = np.multiply(a, b)
-    return sum(c) / sum(a)
+    return divide(sum(c), sum(a))
 
 
-print('NU1, The DaVinci Code : {} ' . format(get_calculated_rating(dataset['THE DA VINCI CODE'], rNU1)))
-print('NU1, RUNNY BABBIT : {} ' . format(get_calculated_rating(dataset['RUNNY BABBIT'], rNU1)))
+# print('NU1, The DaVinci Code : {} ' . format(get_calculated_rating(dataset['THE DA VINCI CODE'], rNU1)))
+# print('NU1, RUNNY BABBIT : {} ' . format(get_calculated_rating(dataset['RUNNY BABBIT'], rNU1)))
+#
+# print('NU2, TRUE BELIEVER : {} ' . format(get_calculated_rating(dataset['TRUE BELIEVER'], rNU2)))
+# print('NU2, THE KITE RUNNER : {} ' . format(get_calculated_rating(dataset['THE KITE RUNNER'], rNU2)))
+
+
+def calculated_rating_list_by_user(b, u):
+    l = list()
+    for book in range(len(b)):
+        l.append(get_calculated_rating(dataset[b[book]], u))
+    return l
+
+
+print('calculated rating list by user NU1')
+print(calculated_rating_list_by_user(BOOKS, rNU1))
+
+print('calculated rating list by user NU2')
+print(calculated_rating_list_by_user(BOOKS, rNU2))
+
+
+def get_mae_by_user(b, u, uc):
+    nan_positions = find_nan_positions(u)
+    a = calculated_rating_list_by_user(b, uc)
+    b = u
+
+    if len(nan_positions) > 0:
+        for x in reversed(range(len(a))):
+                if x in nan_positions:
+                    del a[x]
+        for x in reversed(range(len(b))):
+                if x in nan_positions:
+                    del b[x]
+
+    return np.mean(list(abs(np.array(b) - np.array(a))))
+
+
+print('MAE NU1')
+print(get_mae_by_user(BOOKS, NU1, rNU1))
+
+print('MAE NU2')
+print(get_mae_by_user(BOOKS, NU2, rNU2))
 
