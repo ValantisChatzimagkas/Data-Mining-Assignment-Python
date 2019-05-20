@@ -16,9 +16,32 @@ data = dataset.iloc[:,1:].values
 BOOKS = list(dataset.head(0))
 del BOOKS[0]
 
+print('Give Ratings for user NU0...')
+NU0 = list()
+for book in range(len(BOOKS)):
+    input_value = input('Rating for book '+BOOKS[book]+' : ')
+    if input_value != '':
+        input_value = int(input_value)
+    else:
+        input_value = np.nan
+    NU0.append(input_value)
+
+print('\n')
+print('NU0 Ratings:')
+print(NU0)
+print('\n')
+
 """NEW USERS"""
 NU1 = [3, np.nan, 5, 4, 2, 3, np.nan, 5]
 NU2 = [np.nan, 5, 2, 2, 4, np.nan, 1, 3]
+
+print('NU1 Ratings:')
+print(NU1)
+print('\n')
+
+print('NU2 Ratings:')
+print(NU2)
+print('\n')
 
 """STRATEGY: 
     none = np.nan at missing values
@@ -48,8 +71,13 @@ def user_correlation_array(d, u):
     return rnu
 
 
+rNU0 = user_correlation_array(data, NU0)
 rNU1 = user_correlation_array(data, NU1)
 rNU2 = user_correlation_array(data, NU2)
+
+print('ALL CORREL VALUES r for NU0')
+print(rNU0)
+print('\n')
 
 print('ALL CORREL VALUES r for NU1')
 print(rNU1)
@@ -72,6 +100,7 @@ def get_positions_from_correlation_list(u):
 
 
 print('3 POSITIONS OF CORREL VALUES')
+print(get_positions_from_correlation_list(rNU0))
 print(get_positions_from_correlation_list(rNU1))
 print(get_positions_from_correlation_list(rNU2))
 print('\n')
@@ -86,6 +115,7 @@ def get_values_from_correlation_list(u):
 
 
 print('3 CORREL VALUES')
+print(get_values_from_correlation_list(rNU0))
 print(get_values_from_correlation_list(rNU1))
 print(get_values_from_correlation_list(rNU2))
 print('\n')
@@ -150,6 +180,10 @@ def calculated_rating_list_by_user(b, u):
     return l
 
 
+print('calculated rating list by user NU0')
+print(calculated_rating_list_by_user(BOOKS, rNU0))
+print('\n')
+
 print('calculated rating list by user NU1')
 print(calculated_rating_list_by_user(BOOKS, rNU1))
 print('\n')
@@ -174,6 +208,10 @@ def get_mae_by_user(b, u, uc):
 
     return np.mean(list(abs(np.array(b) - np.array(a))))
 
+
+print('MAE NU0')
+print(get_mae_by_user(BOOKS, NU0, rNU0))
+print('\n')
 
 print('MAE NU1')
 print(get_mae_by_user(BOOKS, NU1, rNU1))
