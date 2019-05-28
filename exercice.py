@@ -11,46 +11,46 @@ if transpose == 'Y':
     print('Transposed dataset created successfully!!')
     print('\n')
     dataset = pd.read_csv('T_DataSet.csv')
-    NU1 = [3, np.nan, 5, 4, 2, 3, np.nan, 5, 4, 2, 3, np.nan, 5, 4, 2, 3, np.nan, 5, 4, 2]
-    NU2 = [np.nan, 5, 2, 2, 4, np.nan, 1, 3, 2, 1, np.nan, 5, 2, 2, 4, np.nan, 1, 3, 2, 1]
+    NE1 = [3, np.nan, 5, 4, 2, 3, np.nan, 5, 4, 2, 3, np.nan, 5, 4, 2, 3, np.nan, 5, 4, 2]
+    NE2 = [np.nan, 5, 2, 2, 4, np.nan, 1, 3, 2, 1, np.nan, 5, 2, 2, 4, np.nan, 1, 3, 2, 1]
 
 if transpose == 'N':
     dataset = pd.read_csv('DataSet.csv')
-    NU1 = [3, np.nan, 5, 4, 2, 3, np.nan, 5]
-    NU2 = [np.nan, 5, 2, 2, 4, np.nan, 1, 3]
+    NE1 = [3, np.nan, 5, 4, 2, 3, np.nan, 5]
+    NE2 = [np.nan, 5, 2, 2, 4, np.nan, 1, 3]
 
 
-users = dataset.iloc[:,:1].values
+col1 = dataset.iloc[:,:1].values
 
 data = dataset.iloc[:,1:].values
 
 HEADERS = list(dataset.head(0))
 del HEADERS[0]
 
+k = int(input('Give k for k-nn :'))
+print('\n')
+
 print('Give Ratings for new entry...')
-NU0 = list()
+NE0 = list()
 for h in range(len(HEADERS)):
     input_value = input('Rating for '+HEADERS[h]+' : ')
     if input_value != '':
         input_value = int(input_value)
     else:
         input_value = np.nan
-    NU0.append(input_value)
+    NE0.append(input_value)
 
 print('\n')
-print('NU0 Ratings:')
-print(NU0)
+print('NE0 Ratings:')
+print(NE0)
 print('\n')
 
-k = int(input('Give k for k-nn :'))
+print('NE1 Ratings:')
+print(NE1)
 print('\n')
 
-print('NU1 Ratings:')
-print(NU1)
-print('\n')
-
-print('NU2 Ratings:')
-print(NU2)
+print('NE2 Ratings:')
+print(NE2)
 print('\n')
 
 """STRATEGY: 
@@ -75,26 +75,26 @@ def pearson_correlation(numbers_x, numbers_y):
 
 
 def user_correlation_array(d, u):
-    rnu = list()
+    rne = list()
     for i in range(len(d)):
-        rnu.append(pearson_correlation(d[i], u))
-    return rnu
+        rne.append(pearson_correlation(d[i], u))
+    return rne
 
 
-rNU0 = user_correlation_array(data, NU0)
-rNU1 = user_correlation_array(data, NU1)
-rNU2 = user_correlation_array(data, NU2)
+rNE0 = user_correlation_array(data, NE0)
+rNE1 = user_correlation_array(data, NE1)
+rNE2 = user_correlation_array(data, NE2)
 
-print('ALL CORREL VALUES r for NU0')
-print(rNU0)
+print('ALL CORREL VALUES r for NE0')
+print(rNE0)
 print('\n')
 
-print('ALL CORREL VALUES r for NU1')
-print(rNU1)
+print('ALL CORREL VALUES r for NE1')
+print(rNE1)
 print('\n')
 
-print('ALL CORREL VALUES r for NU2')
-print(rNU2)
+print('ALL CORREL VALUES r for NE2')
+print(rNE2)
 print('\n')
 
 
@@ -109,10 +109,10 @@ def get_positions_from_correlation_list(u, k):
     return positions[:k]
 
 
-print(str(k) + ' POSITIONS OF CORREL VALUES')
-print(get_positions_from_correlation_list(rNU0, k))
-print(get_positions_from_correlation_list(rNU1, k))
-print(get_positions_from_correlation_list(rNU2, k))
+print(str(k) + ' K-NN POSITIONS OF CORREL VALUES')
+print(get_positions_from_correlation_list(rNE0, k))
+print(get_positions_from_correlation_list(rNE1, k))
+print(get_positions_from_correlation_list(rNE2, k))
 print('\n')
 
 
@@ -124,14 +124,14 @@ def get_values_from_correlation_list(u, k):
     return values
 
 
-print(str(k) + ' CORREL VALUES')
-print(get_values_from_correlation_list(rNU0, k))
-print(get_values_from_correlation_list(rNU1, k))
-print(get_values_from_correlation_list(rNU2, k))
+print(str(k) + ' K-NN CORREL VALUES')
+print(get_values_from_correlation_list(rNE0, k))
+print(get_values_from_correlation_list(rNE1, k))
+print(get_values_from_correlation_list(rNE2, k))
 print('\n')
 
 
-def get_values_from_book_list(m, u, k):
+def get_values_from_data_list(m, u, k):
     values = list()
     positions = get_positions_from_correlation_list(u, k)
     for i in range(len(positions)):
@@ -158,9 +158,9 @@ def divide(x,y):
 
 
 def get_calculated_rating(m, u, k):
-    nan_positions = find_nan_positions(get_values_from_book_list(m, u, k))
+    nan_positions = find_nan_positions(get_values_from_data_list(m, u, k))
     a = get_values_from_correlation_list(u, k)
-    b = get_values_from_book_list(m, u, k)
+    b = get_values_from_data_list(m, u, k)
 
     if len(nan_positions) > 0:
         for x in reversed(range(len(a))):
@@ -174,32 +174,32 @@ def get_calculated_rating(m, u, k):
     return divide(sum(c), sum(a))
 
 
-# print('NU1, The DaVinci Code : {} ' . format(get_calculated_rating(dataset['THE DA VINCI CODE'], rNU1, k)))
-# print('NU1, RUNNY BABBIT : {} ' . format(get_calculated_rating(dataset['RUNNY BABBIT'], rNU1, k)))
+# print('NE1, The DaVinci Code : {} ' . format(get_calculated_rating(dataset['THE DA VINCI CODE'], rNE1, k)))
+# print('NE1, RUNNY BABBIT : {} ' . format(get_calculated_rating(dataset['RUNNY BABBIT'], rNE1, k)))
 # print('\n')
 #
-# print('NU2, TRUE BELIEVER : {} ' . format(get_calculated_rating(dataset['TRUE BELIEVER'], rNU2, k)))
-# print('NU2, THE KITE RUNNER : {} ' . format(get_calculated_rating(dataset['THE KITE RUNNER'], rNU2, k)))
+# print('NE2, TRUE BELIEVER : {} ' . format(get_calculated_rating(dataset['TRUE BELIEVER'], rNE2, k)))
+# print('NE2, THE KITE RUNNER : {} ' . format(get_calculated_rating(dataset['THE KITE RUNNER'], rNE2, k)))
 # print('\n')
 
 
 def calculated_rating_list_by_user(b, u, k):
     l = list()
-    for book in range(len(b)):
-        l.append(get_calculated_rating(dataset[b[book]], u, k))
+    for i in range(len(b)):
+        l.append(get_calculated_rating(dataset[b[i]], u, k))
     return l
 
 
-print('calculated rating list by user NU0')
-print(calculated_rating_list_by_user(HEADERS, rNU0, k))
+print('calculated rating list by user NE0')
+print(calculated_rating_list_by_user(HEADERS, rNE0, k))
 print('\n')
 
-print('calculated rating list by user NU1')
-print(calculated_rating_list_by_user(HEADERS, rNU1, k))
+print('calculated rating list by user NE1')
+print(calculated_rating_list_by_user(HEADERS, rNE1, k))
 print('\n')
 
-print('calculated rating list by user NU2')
-print(calculated_rating_list_by_user(HEADERS, rNU2, k))
+print('calculated rating list by user NE2')
+print(calculated_rating_list_by_user(HEADERS, rNE2, k))
 print('\n')
 
 
@@ -219,14 +219,14 @@ def get_mae_by_user(b, u, uc, k):
     return np.mean(list(abs(np.array(b) - np.array(a))))
 
 
-print('MAE NU0')
-print(get_mae_by_user(HEADERS, NU0, rNU0, k))
+print('MAE NE0')
+print(get_mae_by_user(HEADERS, NE0, rNE0, k))
 print('\n')
 
-print('MAE NU1')
-print(get_mae_by_user(HEADERS, NU1, rNU1, k))
+print('MAE NE1')
+print(get_mae_by_user(HEADERS, NE1, rNE1, k))
 print('\n')
 
-print('MAE NU2')
-print(get_mae_by_user(HEADERS, NU2, rNU2, k))
+print('MAE NE2')
+print(get_mae_by_user(HEADERS, NE2, rNE2, k))
 print('\n')
