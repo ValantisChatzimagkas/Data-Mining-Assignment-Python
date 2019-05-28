@@ -3,23 +3,34 @@ import numpy as np
 
 from sklearn.impute import SimpleImputer
 
-"""DATASET"""
-dataset = pd.read_csv('DataSet.csv')
 
-"""USERS"""
+transpose = input('Transpose DataSet ? (Y/N): ')
+
+if transpose == 'Y':
+    pd.read_csv('DataSet.csv', header=None).T.to_csv('T_DataSet.csv', header=False, index=False)
+    print('Transposed dataset created successfully!!')
+    print('\n')
+    dataset = pd.read_csv('T_DataSet.csv')
+    NU1 = [3, np.nan, 5, 4, 2, 3, np.nan, 5, 4, 2, 3, np.nan, 5, 4, 2, 3, np.nan, 5, 4, 2]
+    NU2 = [np.nan, 5, 2, 2, 4, np.nan, 1, 3, 2, 1, np.nan, 5, 2, 2, 4, np.nan, 1, 3, 2, 1]
+
+if transpose == 'N':
+    dataset = pd.read_csv('DataSet.csv')
+    NU1 = [3, np.nan, 5, 4, 2, 3, np.nan, 5]
+    NU2 = [np.nan, 5, 2, 2, 4, np.nan, 1, 3]
+
+
 users = dataset.iloc[:,:1].values
 
-"""DATA"""
 data = dataset.iloc[:,1:].values
 
-"""BOOKS"""
-BOOKS = list(dataset.head(0))
-del BOOKS[0]
+HEADERS = list(dataset.head(0))
+del HEADERS[0]
 
-print('Give Ratings for user NU0...')
+print('Give Ratings for new entry...')
 NU0 = list()
-for book in range(len(BOOKS)):
-    input_value = input('Rating for book '+BOOKS[book]+' : ')
+for h in range(len(HEADERS)):
+    input_value = input('Rating for '+HEADERS[h]+' : ')
     if input_value != '':
         input_value = int(input_value)
     else:
@@ -31,9 +42,8 @@ print('NU0 Ratings:')
 print(NU0)
 print('\n')
 
-"""NEW USERS"""
-NU1 = [3, np.nan, 5, 4, 2, 3, np.nan, 5]
-NU2 = [np.nan, 5, 2, 2, 4, np.nan, 1, 3]
+k = int(input('Give k for k-nn :'))
+print('\n')
 
 print('NU1 Ratings:')
 print(NU1)
@@ -88,42 +98,42 @@ print(rNU2)
 print('\n')
 
 
-def get_positions_from_correlation_list(u):
+def get_positions_from_correlation_list(u, k):
     theset = frozenset(u)
     theset = sorted(theset, reverse=True)
-    thedict = {}
-    for j in range(3):
-        positions = [i for i, x in enumerate(u) if x == theset[j]]
-        thedict[theset[j]] = positions
-    output = thedict.get(theset[0]) + thedict.get(theset[1]) + thedict.get(theset[2])
-    return output[0:3]
+    positions = []
+    for j in range(k):
+        for i in range(len(u)):
+            if u[i] == theset[j]:
+                positions.append(i)
+    return positions[:k]
 
 
-print('3 POSITIONS OF CORREL VALUES')
-print(get_positions_from_correlation_list(rNU0))
-print(get_positions_from_correlation_list(rNU1))
-print(get_positions_from_correlation_list(rNU2))
+print(str(k) + ' POSITIONS OF CORREL VALUES')
+print(get_positions_from_correlation_list(rNU0, k))
+print(get_positions_from_correlation_list(rNU1, k))
+print(get_positions_from_correlation_list(rNU2, k))
 print('\n')
 
 
-def get_values_from_correlation_list(u):
+def get_values_from_correlation_list(u, k):
     values = list()
-    positions = get_positions_from_correlation_list(u)
+    positions = get_positions_from_correlation_list(u, k)
     for i in range(len(positions)):
         values.append(u[positions[i]])
     return values
 
 
-print('3 CORREL VALUES')
-print(get_values_from_correlation_list(rNU0))
-print(get_values_from_correlation_list(rNU1))
-print(get_values_from_correlation_list(rNU2))
+print(str(k) + ' CORREL VALUES')
+print(get_values_from_correlation_list(rNU0, k))
+print(get_values_from_correlation_list(rNU1, k))
+print(get_values_from_correlation_list(rNU2, k))
 print('\n')
 
 
-def get_values_from_movie_list(m, u):
+def get_values_from_book_list(m, u, k):
     values = list()
-    positions = get_positions_from_correlation_list(u)
+    positions = get_positions_from_correlation_list(u, k)
     for i in range(len(positions)):
          values.append(m[positions[i]])
     return values
@@ -147,10 +157,10 @@ def divide(x,y):
         return 0
 
 
-def get_calculated_rating(m, u):
-    nan_positions = find_nan_positions(get_values_from_movie_list(m, u))
-    a = get_values_from_correlation_list(u)
-    b = get_values_from_movie_list(m, u)
+def get_calculated_rating(m, u, k):
+    nan_positions = find_nan_positions(get_values_from_book_list(m, u, k))
+    a = get_values_from_correlation_list(u, k)
+    b = get_values_from_book_list(m, u, k)
 
     if len(nan_positions) > 0:
         for x in reversed(range(len(a))):
@@ -164,38 +174,38 @@ def get_calculated_rating(m, u):
     return divide(sum(c), sum(a))
 
 
-print('NU1, The DaVinci Code : {} ' . format(get_calculated_rating(dataset['THE DA VINCI CODE'], rNU1)))
-print('NU1, RUNNY BABBIT : {} ' . format(get_calculated_rating(dataset['RUNNY BABBIT'], rNU1)))
-print('\n')
+# print('NU1, The DaVinci Code : {} ' . format(get_calculated_rating(dataset['THE DA VINCI CODE'], rNU1, k)))
+# print('NU1, RUNNY BABBIT : {} ' . format(get_calculated_rating(dataset['RUNNY BABBIT'], rNU1, k)))
+# print('\n')
+#
+# print('NU2, TRUE BELIEVER : {} ' . format(get_calculated_rating(dataset['TRUE BELIEVER'], rNU2, k)))
+# print('NU2, THE KITE RUNNER : {} ' . format(get_calculated_rating(dataset['THE KITE RUNNER'], rNU2, k)))
+# print('\n')
 
-print('NU2, TRUE BELIEVER : {} ' . format(get_calculated_rating(dataset['TRUE BELIEVER'], rNU2)))
-print('NU2, THE KITE RUNNER : {} ' . format(get_calculated_rating(dataset['THE KITE RUNNER'], rNU2)))
-print('\n')
 
-
-def calculated_rating_list_by_user(b, u):
+def calculated_rating_list_by_user(b, u, k):
     l = list()
     for book in range(len(b)):
-        l.append(get_calculated_rating(dataset[b[book]], u))
+        l.append(get_calculated_rating(dataset[b[book]], u, k))
     return l
 
 
 print('calculated rating list by user NU0')
-print(calculated_rating_list_by_user(BOOKS, rNU0))
+print(calculated_rating_list_by_user(HEADERS, rNU0, k))
 print('\n')
 
 print('calculated rating list by user NU1')
-print(calculated_rating_list_by_user(BOOKS, rNU1))
+print(calculated_rating_list_by_user(HEADERS, rNU1, k))
 print('\n')
 
 print('calculated rating list by user NU2')
-print(calculated_rating_list_by_user(BOOKS, rNU2))
+print(calculated_rating_list_by_user(HEADERS, rNU2, k))
 print('\n')
 
 
-def get_mae_by_user(b, u, uc):
+def get_mae_by_user(b, u, uc, k):
     nan_positions = find_nan_positions(u)
-    a = calculated_rating_list_by_user(b, uc)
+    a = calculated_rating_list_by_user(b, uc, k)
     b = u
 
     if len(nan_positions) > 0:
@@ -210,13 +220,13 @@ def get_mae_by_user(b, u, uc):
 
 
 print('MAE NU0')
-print(get_mae_by_user(BOOKS, NU0, rNU0))
+print(get_mae_by_user(HEADERS, NU0, rNU0, k))
 print('\n')
 
 print('MAE NU1')
-print(get_mae_by_user(BOOKS, NU1, rNU1))
+print(get_mae_by_user(HEADERS, NU1, rNU1, k))
 print('\n')
 
 print('MAE NU2')
-print(get_mae_by_user(BOOKS, NU2, rNU2))
+print(get_mae_by_user(HEADERS, NU2, rNU2, k))
 print('\n')
